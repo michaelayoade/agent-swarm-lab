@@ -1,0 +1,63 @@
+name: Auto Review Agent PRs
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches: [main]
+
+jobs:
+  auto-review:
+    if: startsWith(github.head_ref, 'agent/')
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get PR diff
+        id: diff
+        run: |
+          gh pr diff ${{ github.event.pull_request.number }} > /tmp/pr-diff.txt
+          echo "diff_size=$(wc -l < /tmp/pr-diff.txt)" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Review with DeepSeek
+        if: steps.diff.outputs.diff_size != '0'
+        run: |
+          DIFF=$(cat /tmp/pr-diff.txt | head -3000)
+          PR_TITLE="${{ github.event.pull_request.title }}"
+
+          REVIEW=$(curl -s "https://api.deepseek.com/chat/completions" \
+            -H "Authorization: Bearer ${{ secrets.DEEPSEEK_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n \
+              --arg diff "$DIFF" \
+              --arg title "$PR_TITLE" \
+              '{
+                model: "deepseek-chat",
+                messages: [{
+                  role: "user",
+                  content: ("Review this PR titled: " + $title + "\n\nProvide: 1) Correctness check 2) Security scan 3) Performance notes 4) Overall verdict (approve/changes needed). Keep under 400 words.\n\nDiff:\n" + $diff)
+                }],
+                temperature: 0.3,
+                max_tokens: 1200
+              }')" | jq -r '.choices[0].message.content // "Review failed"')
+
+          BODY=$(cat <<EOF
+          ## 🤖 Seabone Automated Review
+
+          $REVIEW
+
+          ---
+          *Automated review by Seabone Agent Swarm (DeepSeek) via GitHub Actions*
+          EOF
+          )
+
+          gh pr comment ${{ github.event.pull_request.number }} --body "$BODY"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

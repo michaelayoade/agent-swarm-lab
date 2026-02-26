@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-scripts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check script syntax
+        run: |
+          for script in scripts/*.sh; do
+            echo "Checking $script..."
+            bash -n "$script"
+          done
+
+      - name: Validate JSON configs
+        run: |
+          for json in .seabone/*.json; do
+            echo "Validating $json..."
+            jq empty "$json"
+          done
+
+  test-agent-logic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check required files exist
+        run: |
+          test -f scripts/spawn-agent.sh
+          test -f scripts/check-agents.sh
+          test -f scripts/cleanup-worktrees.sh
+          test -f scripts/notify-telegram.sh
+          test -f scripts/review-pr.sh
+          test -f scripts/list-tasks.sh
+          test -f .seabone/config.json
+          test -f .seabone/active-tasks.json
+          test -f AGENTS.md
+          echo "All required files present"

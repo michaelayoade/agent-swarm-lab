@@ -1,0 +1,10 @@
+{
+  "max_concurrent_agents": 3,
+  "max_retries": 3,
+  "agent_timeout_minutes": 30,
+  "model": "deepseek-chat",
+  "reason_model": "deepseek-reasoner",
+  "worktree_base": "agent",
+  "auto_review": true,
+  "auto_cleanup_days": 7
+}
