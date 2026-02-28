@@ -26,26 +26,27 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Review with DeepSeek
+      - name: Review with MiniMax M2.5
         if: steps.diff.outputs.diff_size != '0'
         run: |
           DIFF=$(cat /tmp/pr-diff.txt | head -3000)
           PR_TITLE="${{ github.event.pull_request.title }}"
 
-          REVIEW=$(curl -s "https://api.deepseek.com/chat/completions" \
-            -H "Authorization: Bearer ${{ secrets.DEEPSEEK_API_KEY }}" \
+          REVIEW=$(curl -s "https://openrouter.ai/api/v1/chat/completions" \
+            -H "Authorization: Bearer ${{ secrets.OPENROUTER_API_KEY }}" \
             -H "Content-Type: application/json" \
+            -H "X-Title: seabone-auto-review" \
             -d "$(jq -n \
               --arg diff "$DIFF" \
               --arg title "$PR_TITLE" \
               '{
-                model: "deepseek-chat",
+                model: "minimax/minimax-m2.5",
                 messages: [{
                   role: "user",
-                  content: ("Review this PR titled: " + $title + "\n\nProvide: 1) Correctness check 2) Security scan 3) Performance notes 4) Overall verdict (approve/changes needed). Keep under 400 words.\n\nDiff:\n" + $diff)
+                  content: ("Review this PR titled: " + $title + "\n\nCheck for: 1) Correctness 2) Security issues (hardcoded secrets, injection, path traversal) 3) Performance 4) Verdict: approve/changes-needed. Under 400 words.\n\nDiff:\n" + $diff)
                 }],
-                temperature: 0.3,
-                max_tokens: 1200
+                temperature: 0.2,
+                max_tokens: 1500
               }')" | jq -r '.choices[0].message.content // "Review failed"')
 
           BODY=$(cat <<EOF
@@ -54,7 +55,7 @@ jobs:
           $REVIEW
 
           ---
-          *Automated review by Seabone Agent Swarm (DeepSeek) via GitHub Actions*
+          *Automated review by Seabone Agent Swarm (MiniMax M2.5 via OpenRouter)*
           EOF
           )
 

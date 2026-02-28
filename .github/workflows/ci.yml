@@ -7,12 +7,12 @@ on:
     branches: [main]
 
 jobs:
-  lint-scripts:
+  lint-and-syntax:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check script syntax
+      - name: Check bash script syntax
         run: |
           for script in scripts/*.sh; do
             echo "Checking $script..."
@@ -26,20 +26,81 @@ jobs:
             jq empty "$json"
           done
 
-  test-agent-logic:
+  security-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install test dependencies
+        run: pip install pytest
+
+      - name: Run security regression tests
+        run: python -m pytest tests/test_security_regressions.py -v --tb=short
+
+  required-files:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - name: Check required files exist
         run: |
-          test -f scripts/spawn-agent.sh
-          test -f scripts/check-agents.sh
-          test -f scripts/cleanup-worktrees.sh
-          test -f scripts/notify-telegram.sh
-          test -f scripts/review-pr.sh
-          test -f scripts/list-tasks.sh
-          test -f .seabone/config.json
-          test -f .seabone/active-tasks.json
-          test -f AGENTS.md
-          echo "All required files present"
+          files=(
+            scripts/spawn-agent.sh
+            scripts/check-agents.sh
+            scripts/cleanup-worktrees.sh
+            scripts/notify-telegram.sh
+            scripts/review-pr.sh
+            scripts/list-tasks.sh
+            scripts/seabone.sh
+            .seabone/config.json
+            .seabone/active-tasks.json
+            tests/test_security_regressions.py
+            AGENTS.md
+          )
+          for f in "${files[@]}"; do
+            test -f "$f" && echo "✓ $f" || { echo "✗ MISSING: $f"; exit 1; }
+          done
+
+  credential-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Scan for hardcoded secrets
+        run: |
+          echo "Scanning for potential hardcoded credentials..."
+          FOUND=0
+
+          # Check for common secret patterns in tracked files
+          for pattern in \
+            'postgres://[^$]*:[^$]*@' \
+            'api[_-]key.*=.*['\''"][A-Za-z0-9]{20,}' \
+            'Bearer [A-Za-z0-9+/=_-]{20,}'; do
+            
+            MATCHES=$(git grep -l -E "$pattern" -- '*.sh' '*.py' '*.json' '*.yml' \
+              ':!*.example' ':!tests/' ':!*.md' 2>/dev/null || true)
+            
+            if [ -n "$MATCHES" ]; then
+              echo "⚠️  Pattern '$pattern' found in: $MATCHES"
+              FOUND=1
+            fi
+          done
+
+          # Check config.json specifically for inline credentials
+          if grep -q 'postgres:postgres@' .seabone/config.json 2>/dev/null; then
+            echo "✗ Hardcoded postgres credentials in config.json"
+            FOUND=1
+          fi
+
+          if [ "$FOUND" -eq 1 ]; then
+            echo ""
+            echo "::error::Potential hardcoded credentials detected. Use environment variables."
+            exit 1
+          fi
+
+          echo "✓ No hardcoded credentials found"
