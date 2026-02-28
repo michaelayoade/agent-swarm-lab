@@ -105,9 +105,26 @@
     "api": "aider",
     "coverage": "aider",
     "refactor": "aider",
-    "feature": "aider"
+    "feature": "aider",
+    "frontend": "claude-frontend",
+    "backend": "claude",
+    "database": "claude",
+    "optimization": "claude",
+    "integration": "claude"
   },
   "plan_before_execute": true,
   "plan_engine": "claude",
-  "plan_model": "sonnet"
+  "plan_model": "sonnet",
+  "focus_rotation": [
+    "security",
+    "fullstack",
+    "frontend",
+    "backend",
+    "database",
+    "optimization",
+    "quality",
+    "api",
+    "deps",
+    "coverage"
+  ]
 }
