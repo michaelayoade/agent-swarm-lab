@@ -78,7 +78,7 @@
   },
   "shared_context_max_entries": 300,
   "codex_model": "o3",
-  "claude_model": "sonnet",
+  "claude_model": "opus",
   "review_model": "opus",
   "engine": "aider",
   "review_models": {
