@@ -126,5 +126,14 @@
     "api",
     "deps",
     "coverage"
+  ],
+  "auto_merge_enabled": true,
+  "auto_merge_tracks": [
+    "lint-fix",
+    "deps",
+    "docs",
+    "formatting",
+    "changelog",
+    "readme"
   ]
 }
