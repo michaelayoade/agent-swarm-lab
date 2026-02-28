@@ -110,8 +110,8 @@ DEFAULT_CONFIG = {
     "max_concurrent_agents": 3,
     "max_retries": 3,
     "agent_timeout_minutes": 30,
-    "model": "deepseek-chat",
-    "reason_model": "deepseek-reasoner",
+    "model": "sonnet",
+    "reason_model": "opus",
     "worktree_base": "agent",
     "auto_review": True,
     "auto_cleanup_days": 7,
@@ -606,7 +606,7 @@ VALID_ID_RE = re.compile(r"^[a-zA-Z0-9_-]+$")
 MAX_TASK_ID_LEN = 64
 MAX_DESCRIPTION_LEN = 4096
 MAX_MEMORY_CONTENT = 10_000
-ALLOWED_MODELS = frozenset({"", "deepseek-chat", "deepseek-reasoner"})
+ALLOWED_MODELS = frozenset({"", "deepseek-chat", "deepseek-reasoner", "sonnet", "opus", "o3", "openrouter/minimax/minimax-m2.5"})
 
 
 def sanitize_task_id(raw: str) -> str | None:
@@ -1352,7 +1352,7 @@ TOOLS = [
                 "properties": {
                     "task_id": {"type": "string", "description": "Short kebab-case task identifier (e.g. 'fix-login-bug'). Will be auto-generated if empty."},
                     "description": {"type": "string", "description": "What the agent should implement — be specific and detailed."},
-                    "model": {"type": "string", "description": "Model override (e.g. 'deepseek-chat', 'deepseek-reasoner'). Leave empty for auto-selection."},
+                    "model": {"type": "string", "description": "Model override (e.g. 'sonnet', 'opus', 'openrouter/minimax/minimax-m2.5'). Leave empty for auto-selection."},
                     "priority": {"type": "integer", "description": "Priority 1-10 (1=urgent, 5=normal, 10=low). Default 5."},
                 },
                 "required": ["description"],
@@ -1562,7 +1562,7 @@ def _filter_tools(allowed: set[str] | None) -> list[dict]:
 def _ds_request(messages: list[dict], tools: list | None = None) -> dict:
     """Call DeepSeek chat completions API."""
     body: dict = {
-        "model": "deepseek-chat",
+        "model": "sonnet",
         "messages": messages,
         "max_tokens": 2048,
         "temperature": 0.7,
