@@ -91,17 +91,17 @@ load_env(PROJECT_DIR / ".env.agent-swarm")
 
 BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
-DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
+OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
 
 if not BOT_TOKEN or not CHAT_ID:
     log.error("TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID must be set")
     sys.exit(1)
-if not DEEPSEEK_API_KEY:
-    log.error("DEEPSEEK_API_KEY must be set")
+if not OPENROUTER_API_KEY:
+    log.error("OPENROUTER_API_KEY must be set")
     sys.exit(1)
 
 TG_API = f"https://api.telegram.org/bot{BOT_TOKEN}"
-DS_API = "https://api.deepseek.com/chat/completions"
+OR_API = "https://openrouter.ai/api/v1/chat/completions"
 
 # ---------------------------------------------------------------------------
 # 5. Config loading (deep-merge with new defaults)
@@ -606,7 +606,7 @@ VALID_ID_RE = re.compile(r"^[a-zA-Z0-9_-]+$")
 MAX_TASK_ID_LEN = 64
 MAX_DESCRIPTION_LEN = 4096
 MAX_MEMORY_CONTENT = 10_000
-ALLOWED_MODELS = frozenset({"", "deepseek-chat", "deepseek-reasoner", "sonnet", "opus", "o3", "openrouter/minimax/minimax-m2.5"})
+ALLOWED_MODELS = frozenset({"", "sonnet", "opus", "o3", "openrouter/minimax/minimax-m2.5"})
 
 
 def sanitize_task_id(raw: str) -> str | None:
@@ -1572,10 +1572,10 @@ def _ds_request(messages: list[dict], tools: list | None = None) -> dict:
 
     payload = json.dumps(body).encode()
     req = urllib.request.Request(
-        DS_API, data=payload,
+        OR_API, data=payload,
         headers={
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
+            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         },
         method="POST",
     )
