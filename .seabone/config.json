@@ -80,9 +80,9 @@
   "codex_model": "o3",
   "claude_model": "sonnet",
   "review_model": "opus",
-  "engine": "aider",
+  "engine": "claude",
   "review_models": {
-    "multi_review_enabled": true,
+    "multi_review_enabled": false,
     "models": [
       "opus"
     ],
