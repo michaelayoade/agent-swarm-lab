@@ -86,6 +86,26 @@ class TestInputValidation:
     def test_file_path_validation_exists(self, telegram_bot_source):
         assert "PROJECT_DIR" in telegram_bot_source or "project_dir" in telegram_bot_source
 
+    def test_path_validation_uses_relative_to_not_startswith(self, telegram_bot_source):
+        """relative_to() rejects sibling dirs like 'agent-swarm-lab-evil/'; startswith() does not."""
+        assert "relative_to(PROJECT_DIR)" in telegram_bot_source, (
+            "Path validation must use relative_to() instead of startswith() to prevent "
+            "prefix-match bypass (e.g. a sibling dir named 'project-evil' would fool startswith)"
+        )
+
+    def test_find_command_has_path_restriction(self, telegram_bot_source):
+        """find must restrict search paths to the project directory."""
+        # The find block must contain both a path_args collection and relative_to check.
+        find_block_idx = telegram_bot_source.find('if prog == "find"')
+        assert find_block_idx != -1, "find validation block not found"
+        # Grab a window of source after the find block (up to the safe_single block)
+        safe_single_idx = telegram_bot_source.find('safe_single', find_block_idx)
+        find_block = telegram_bot_source[find_block_idx:safe_single_idx]
+        assert "relative_to" in find_block, (
+            "find command must apply relative_to() path restriction to prevent "
+            "enumeration of files outside the project directory (e.g. find /etc)"
+        )
+
 
 # --- Config integrity ---
 
