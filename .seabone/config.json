@@ -79,14 +79,17 @@
   "shared_context_max_entries": 300,
   "codex_model": "o3",
   "claude_model": "sonnet",
-  "review_model": "minimax/minimax-m2.5",
-  "engine": "claude",
+  "review_model": "opus",
+  "engine": "aider",
   "review_models": {
     "multi_review_enabled": true,
     "models": [
-      "minimax/minimax-m2.5",
-      "qwen/qwen3.5-flash-02-23"
+      "opus"
     ],
-    "consensus_threshold": 2
-  }
+    "consensus_threshold": 1
+  },
+  "aider_model": "openrouter/minimax/minimax-m2.5",
+  "review_engine": "claude",
+  "escalation_engine": "claude",
+  "escalation_model": "opus"
 }

@@ -1,7 +1,25 @@
 {
   "version": 1,
-  "updated_at": "2026-02-28T13:51:28Z",
+  "updated_at": "2026-02-28T14:19:11Z",
   "findings": [
+    {
+      "id": "ctx-20260228141911-2200",
+      "ts": "2026-02-28T14:19:11Z",
+      "source": "fix-security-002-v1",
+      "kind": "pattern",
+      "scope": "scripts/pre-commit-check.sh",
+      "note": "Pre-commit hook used dirname(SCRIPT_DIR) to determine PROJECT_DIR. When invoked as a symlinked git hook in a worktree, BASH_SOURCE[0] resolves to the .git/hooks path, making PROJECT_DIR point to .git/ instead of the repo root. Fix: use git rev-parse --show-toplevel as canonical project root.",
+      "confidence": 0.97
+    },
+    {
+      "id": "ctx-20260228141906-18708",
+      "ts": "2026-02-28T14:19:06Z",
+      "source": "fix-security-002-v1",
+      "kind": "pattern",
+      "scope": "telegram-bot.py/_validate_readonly_shell_command",
+      "note": "startswith(str(PROJECT_DIR)) has a prefix-match bypass for sibling dirs (e.g. 'agent-swarm-lab-evil/'). Always use Path.relative_to(PROJECT_DIR) instead. Also: find was missing path restriction — apply relative_to() to all non-flag args for find too.",
+      "confidence": 0.98
+    },
     {
       "id": "ctx-20260228135128-8241",
       "ts": "2026-02-28T13:51:28Z",
