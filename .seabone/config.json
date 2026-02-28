@@ -35,7 +35,7 @@
       "command": "/bin/bash",
       "args": [
         "-lc",
-        "DOTMAC_ERP_DB_DSN='postgresql://postgres:postgres@localhost:5437/dotmac_erp'; export DOTMAC_ERP_DB_DSN; exec npx -y @bytebase/dbhub --dsn \"$DOTMAC_ERP_DB_DSN\""
+        "exec npx -y @bytebase/dbhub --dsn \"${DOTMAC_ERP_DB_DSN:?DOTMAC_ERP_DB_DSN must be set in .env.agent-swarm}\""
       ],
       "cwd": "/home/dotmac/projects/dotmac_erp",
       "description": "DotMac ERP database - read-only queries",
