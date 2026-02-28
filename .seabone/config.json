@@ -91,5 +91,20 @@
   "aider_model": "openrouter/minimax/minimax-m2.5",
   "review_engine": "claude",
   "escalation_engine": "claude",
-  "escalation_model": "opus"
+  "escalation_model": "opus",
+  "engine_routing": {
+    "deps": "aider",
+    "docs": "aider",
+    "formatting": "aider",
+    "lint-fix": "aider",
+    "readme": "aider",
+    "changelog": "aider",
+    "test-scaffold": "aider",
+    "security": "claude",
+    "quality": "claude",
+    "api": "claude",
+    "coverage": "claude",
+    "refactor": "claude",
+    "feature": "claude"
+  }
 }
