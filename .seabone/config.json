@@ -113,8 +113,8 @@
     "integration": "claude"
   },
   "plan_before_execute": true,
-  "plan_engine": "claude",
-  "plan_model": "sonnet",
+  "plan_engine": "openrouter",
+  "plan_model": "anthropic/claude-sonnet-4-6",
   "focus_rotation": [
     "security",
     "fullstack",

@@ -10,7 +10,7 @@
     "engine": "claude",
     "priority_score": 80,
     "track": "reactive",
-    "status": "in_progress",
+    "status": "merged",
     "attempt_count": 1,
     "last_attempt": "2026-02-28T13:45:37Z"
   },
@@ -25,7 +25,7 @@
     "engine": "claude",
     "priority_score": 60,
     "track": "reactive",
-    "status": "in_progress",
+    "status": "merged",
     "attempt_count": 1,
     "last_attempt": "2026-02-28T13:45:37Z"
   }
