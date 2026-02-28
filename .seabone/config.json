@@ -80,7 +80,7 @@
   "codex_model": "o3",
   "claude_model": "sonnet",
   "review_model": "opus",
-  "engine": "claude",
+  "engine": "aider",
   "review_models": {
     "multi_review_enabled": false,
     "models": [
@@ -100,12 +100,12 @@
     "readme": "aider",
     "changelog": "aider",
     "test-scaffold": "aider",
-    "security": "claude",
-    "quality": "claude",
-    "api": "claude",
-    "coverage": "claude",
-    "refactor": "claude",
-    "feature": "claude"
+    "security": "aider",
+    "quality": "aider",
+    "api": "aider",
+    "coverage": "aider",
+    "refactor": "aider",
+    "feature": "aider"
   },
   "plan_before_execute": true,
   "plan_engine": "claude",
