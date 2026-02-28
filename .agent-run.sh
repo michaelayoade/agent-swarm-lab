@@ -3,14 +3,14 @@ set -euo pipefail
 export PATH="$HOME/.local/bin:$PATH"
 
 # ---- Injected at spawn time ----
-WORKTREE_DIR=/home/dotmac/projects/agent-swarm-lab/.worktrees/fix-security-001
+WORKTREE_DIR=/home/dotmac/projects/agent-swarm-lab/.worktrees/fix-security-002
 PROJECT_DIR=/home/dotmac/projects/agent-swarm-lab
 SCRIPT_DIR=/home/dotmac/projects/agent-swarm-lab/scripts
 ACTIVE_FILE=/home/dotmac/projects/agent-swarm-lab/.seabone/active-tasks.json
-LOG_FILE=/home/dotmac/projects/agent-swarm-lab/.seabone/logs/fix-security-001.log
-TASK_ID=fix-security-001
-DESCRIPTION=Replace\ hardcoded\ API\ key
-BRANCH=agent/fix-security-001
+LOG_FILE=/home/dotmac/projects/agent-swarm-lab/.seabone/logs/fix-security-002.log
+TASK_ID=fix-security-002
+DESCRIPTION=Add\ input\ sanitization
+BRANCH=agent/fix-security-002
 ENGINE=claude
 MODEL=sonnet
 EVENT_LOG=/home/dotmac/projects/agent-swarm-lab/.seabone/logs/events.log

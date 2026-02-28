@@ -603,13 +603,22 @@ def help_keyboard() -> dict:
 
 # Sanitisation
 VALID_ID_RE = re.compile(r"^[a-zA-Z0-9_-]+$")
+MAX_TASK_ID_LEN = 64
+MAX_DESCRIPTION_LEN = 4096
+MAX_MEMORY_CONTENT = 10_000
+ALLOWED_MODELS = frozenset({"", "deepseek-chat", "deepseek-reasoner"})
 
 
 def sanitize_task_id(raw: str) -> str | None:
     cleaned = raw.strip().lower()
+    # Truncate before further processing to avoid regex DoS on huge inputs
+    cleaned = cleaned[:MAX_TASK_ID_LEN * 2]
     cleaned = re.sub(r"[^a-z0-9_-]+", "-", cleaned)
     cleaned = cleaned.strip("-")
     cleaned = re.sub(r"-{2,}", "-", cleaned)
+    # Enforce max length after normalisation
+    cleaned = cleaned[:MAX_TASK_ID_LEN]
+    cleaned = cleaned.strip("-")
     if not cleaned or not VALID_ID_RE.match(cleaned):
         return None
     return cleaned
@@ -628,6 +637,17 @@ def generate_task_id(text: str) -> str:
 def tool_spawn_agent(task_id: str, description: str, model: str = "",
                      priority: int = 5) -> str:
     """Spawn a coding agent."""
+    if not description:
+        return "ERROR: description is required"
+    if len(description) > MAX_DESCRIPTION_LEN:
+        return f"ERROR: description too long ({len(description)} chars, max {MAX_DESCRIPTION_LEN})"
+    if model and model not in ALLOWED_MODELS:
+        return f"ERROR: invalid model '{model}'"
+    try:
+        priority = max(1, min(10, int(priority)))
+    except (TypeError, ValueError):
+        priority = 5
+
     tid = sanitize_task_id(task_id)
     if not tid:
         tid = generate_task_id(description)
@@ -709,15 +729,24 @@ def tool_kill_task(task_id: str) -> str:
     except Exception as exc:
         parts.append(f"tmux error: {exc}")
 
-    update_script = (
-        f'source "{SCRIPT_DIR}/json-lock.sh"\n'
-        f'json_update "{ACTIVE_FILE}" '
-        f"'(.[] | select(.id == \"{tid}\") | .status) = \"killed\"'"
-    )
+    # Update JSON directly in Python — avoids bash -c with string interpolation.
     try:
-        subprocess.run(["bash", "-c", update_script],
-                       capture_output=True, text=True, timeout=15,
-                       cwd=str(PROJECT_DIR))
+        if ACTIVE_FILE.is_file():
+            lock_path = ACTIVE_FILE.with_suffix(".lock")
+            with open(lock_path, "w") as lock_fd:
+                fcntl.flock(lock_fd, fcntl.LOCK_EX)
+                try:
+                    with open(ACTIVE_FILE) as fh:
+                        tasks = json.load(fh)
+                    for task in tasks:
+                        if isinstance(task, dict) and task.get("id") == tid:
+                            task["status"] = "killed"
+                    tmp = ACTIVE_FILE.with_suffix(".tmp")
+                    with open(tmp, "w") as fh:
+                        json.dump(tasks, fh, indent=2)
+                    tmp.replace(ACTIVE_FILE)
+                finally:
+                    fcntl.flock(lock_fd, fcntl.LOCK_UN)
         parts.append(f"Marked '{tid}' as killed in active-tasks.json")
     except Exception as exc:
         parts.append(f"JSON update error: {exc}")
@@ -847,6 +876,18 @@ def _validate_readonly_shell_command(command: str) -> tuple[bool, str, list[str]
 
     safe_single = {"ls", "pwd", "cat", "head", "tail", "wc", "rg", "jq"}
     if prog in safe_single:
+        # Restrict path arguments to within the project directory to prevent
+        # reading sensitive files outside the repo (e.g. /etc/passwd, ~/.ssh).
+        path_args = [t for t in tokens[1:] if not t.startswith("-")]
+        for arg in path_args:
+            try:
+                resolved = Path(arg).resolve()
+            except Exception:
+                return False, f"invalid path argument: {arg!r}", []
+            if not str(resolved).startswith(str(PROJECT_DIR)):
+                return False, (
+                    f"path '{arg}' is outside the project directory"
+                ), []
         return True, "", tokens
 
     return False, f"command '{prog}' is not in the read-only allowlist", []
@@ -880,6 +921,12 @@ def tool_shell_command(command: str) -> str:
 
 def tool_write_memory(content: str, target: str = "memory") -> str:
     """Write to long-term memory (MEMORY.md) or today's daily log."""
+    if target not in ("memory", "daily"):
+        return "ERROR: target must be 'memory' or 'daily'"
+    if not content:
+        return "ERROR: content is required"
+    if len(content) > MAX_MEMORY_CONTENT:
+        return f"ERROR: content too long ({len(content)} chars, max {MAX_MEMORY_CONTENT})"
     try:
         if target == "daily":
             today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
