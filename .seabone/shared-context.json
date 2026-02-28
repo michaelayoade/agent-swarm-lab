@@ -1,15 +1,15 @@
 {
   "version": 1,
-  "updated_at": "2026-02-28T13:51:25Z",
+  "updated_at": "2026-02-28T13:51:28Z",
   "findings": [
     {
-      "id": "ctx-20260228135125-18587",
-      "ts": "2026-02-28T13:51:25Z",
-      "source": "fix-security-001",
+      "id": "ctx-20260228135128-8241",
+      "ts": "2026-02-28T13:51:28Z",
+      "source": "fix-security-002",
       "kind": "pattern",
-      "scope": "config.json / MCP servers",
-      "note": "Hardcoded DB credentials in .seabone/config.json MCP server args replaced with env var DOTMAC_ERP_DB_DSN. Always use ${VAR:?msg} for required env vars in shell args.",
-      "confidence": 0.9
+      "scope": "telegram-bot.py",
+      "note": "Input sanitization: sanitize_task_id already existed; gaps were: no content-size limit in tool_write_memory, no description/priority/model validation in tool_spawn_agent, bash -c string interpolation in tool_kill_task (tid was sanitized but pattern is unsafe), and cat/head/tail/rg/jq allowed arbitrary file paths outside project dir in _validate_readonly_shell_command.",
+      "confidence": 0.95
     }
   ]
 }

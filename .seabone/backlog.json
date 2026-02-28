@@ -7,13 +7,12 @@
     "file": "scripts/spawn-agent.sh",
     "issue": "Hardcoded API key",
     "task": "Replace hardcoded API key",
-    "engine": "codex-senior",
+    "engine": "claude",
     "priority_score": 80,
     "track": "reactive",
-    "status": "failed",
+    "status": "in_progress",
     "attempt_count": 1,
-    "last_attempt": "2026-02-28T11:24:24Z",
-    "outcome": "failed"
+    "last_attempt": "2026-02-28T13:45:37Z"
   },
   {
     "id": "security-002",
@@ -23,12 +22,11 @@
     "file": "scripts/check-agents.sh",
     "issue": "Missing input validation",
     "task": "Add input sanitization",
-    "engine": "codex",
+    "engine": "claude",
     "priority_score": 60,
     "track": "reactive",
-    "status": "failed",
+    "status": "in_progress",
     "attempt_count": 1,
-    "last_attempt": "2026-02-28T11:24:24Z",
-    "outcome": "failed"
+    "last_attempt": "2026-02-28T13:45:37Z"
   }
 ]

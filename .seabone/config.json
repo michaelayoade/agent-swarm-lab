@@ -1,6 +1,6 @@
 {
-  "max_concurrent_agents": 5,
-  "max_retries": 3,
+  "max_concurrent_agents": 2,
+  "max_retries": 1,
   "agent_timeout_minutes": 30,
   "worktree_base": "agent",
   "auto_review": true,
@@ -12,7 +12,7 @@
     "go-vet"
   ],
   "quality_gate_retries": 1,
-  "max_review_cycles": 2,
+  "max_review_cycles": 1,
   "queue_enabled": true,
   "max_queue_size": 50,
   "heartbeat_timeout_minutes": 15,
@@ -29,7 +29,7 @@
   ],
   "model_learning_enabled": true,
   "log_retention_days": 14,
-  "queue_dispatch_batch": 0,
+  "queue_dispatch_batch": 1,
   "mcp_servers": {
     "erp-db": {
       "command": "/bin/bash",
@@ -44,12 +44,12 @@
     }
   },
   "single_executor_mode": false,
-  "single_executor_engine": "codex",
-  "codex_only_execution": true,
-  "coordinator_engine": "codex",
-  "coordinator_model": "gpt-5.3-codex",
-  "pm_engine": "codex",
-  "pm_model": "gpt-5.3-codex",
+  "single_executor_engine": "claude",
+  "codex_only_execution": false,
+  "coordinator_engine": "claude",
+  "coordinator_model": "sonnet",
+  "pm_engine": "claude",
+  "pm_model": "sonnet",
   "fleet_enabled": true,
   "fleet_db_path": "/home/dotmac/projects/.seabone-fleet/fleet.db",
   "fleet_lease_ttl_seconds": 1800,
@@ -76,5 +76,17 @@
       "maintenance": 5
     }
   },
-  "shared_context_max_entries": 300
+  "shared_context_max_entries": 300,
+  "codex_model": "o3",
+  "claude_model": "sonnet",
+  "review_model": "minimax/minimax-m2.5",
+  "engine": "claude",
+  "review_models": {
+    "multi_review_enabled": true,
+    "models": [
+      "minimax/minimax-m2.5",
+      "qwen/qwen3.5-flash-02-23"
+    ],
+    "consensus_threshold": 2
+  }
 }
