@@ -4,7 +4,9 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+# Use git to locate the worktree root (works correctly in both worktrees and
+# the main repo, unlike dirname-based detection which breaks for symlinked hooks).
+PROJECT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || dirname "$SCRIPT_DIR")"
 cd "$PROJECT_DIR"
 
 ERRORS=0

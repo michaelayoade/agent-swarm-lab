@@ -867,27 +867,40 @@ def _validate_readonly_shell_command(command: str) -> tuple[bool, str, list[str]
         return False, "only 'gh pr list', 'gh pr view', and 'gh repo view' are allowed", []
 
     if prog == "find":
-        # Block destructive/actions forms while allowing normal read-only searches.
+        # Block destructive/execute forms while allowing normal read-only searches.
         forbidden_find = {"-delete", "-exec", "-execdir", "-ok", "-okdir", "-fprint", "-fprintf"}
         for tok in tokens[1:]:
             if tok in forbidden_find:
                 return False, f"find option '{tok}' is not allowed", []
-        return True, "", tokens
-
-    safe_single = {"ls", "pwd", "cat", "head", "tail", "wc", "rg", "jq"}
-    if prog in safe_single:
-        # Restrict path arguments to within the project directory to prevent
-        # reading sensitive files outside the repo (e.g. /etc/passwd, ~/.ssh).
+        # Restrict path arguments to within the project directory.
         path_args = [t for t in tokens[1:] if not t.startswith("-")]
         for arg in path_args:
             try:
                 resolved = Path(arg).resolve()
             except Exception:
                 return False, f"invalid path argument: {arg!r}", []
-            if not str(resolved).startswith(str(PROJECT_DIR)):
-                return False, (
-                    f"path '{arg}' is outside the project directory"
-                ), []
+            try:
+                resolved.relative_to(PROJECT_DIR)
+            except ValueError:
+                return False, f"path '{arg}' is outside the project directory", []
+        return True, "", tokens
+
+    safe_single = {"ls", "pwd", "cat", "head", "tail", "wc", "rg", "jq"}
+    if prog in safe_single:
+        # Restrict path arguments to within the project directory to prevent
+        # reading sensitive files outside the repo (e.g. /etc/passwd, ~/.ssh).
+        # Use relative_to() rather than startswith() to avoid prefix-match bypass
+        # (e.g. a sibling directory named 'agent-swarm-lab-evil' would fool startswith).
+        path_args = [t for t in tokens[1:] if not t.startswith("-")]
+        for arg in path_args:
+            try:
+                resolved = Path(arg).resolve()
+            except Exception:
+                return False, f"invalid path argument: {arg!r}", []
+            try:
+                resolved.relative_to(PROJECT_DIR)
+            except ValueError:
+                return False, f"path '{arg}' is outside the project directory", []
         return True, "", tokens
 
     return False, f"command '{prog}' is not in the read-only allowlist", []
