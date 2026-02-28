@@ -135,5 +135,6 @@
     "formatting",
     "changelog",
     "readme"
-  ]
+  ],
+  "consolidate_prs": true
 }
