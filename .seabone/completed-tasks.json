@@ -164,5 +164,30 @@
     "started_at": "2026-02-28T14:10:28Z",
     "last_heartbeat": "2026-02-28T14:10:28Z",
     "completed_at": "2026-02-28T14:20:17Z"
+  },
+  {
+    "id": "fix-security-001-v1",
+    "description": "Retry attempt 1 for fix-security-001. Original task: Replace hardcoded API key",
+    "branch": "agent/fix-security-001-v1",
+    "engine": "claude",
+    "model": "sonnet",
+    "scope": "file:scripts/spawn-agent.sh",
+    "track": "reactive",
+    "execution_role": "engineer",
+    "priority": 5,
+    "priority_score": 55,
+    "kpi_target": "",
+    "depends_on": [],
+    "estimated_effort": 3,
+    "impact": 3,
+    "risk_reduction": 3,
+    "urgency": 3,
+    "session": "agent-agent-swarm-lab-fix-security-001-v1",
+    "worktree": "/home/dotmac/projects/agent-swarm-lab/.worktrees/fix-security-001-v1",
+    "status": "error",
+    "retries": 0,
+    "started_at": "2026-02-28T15:00:20Z",
+    "last_heartbeat": "2026-02-28T15:00:20Z",
+    "completed_at": "2026-02-28T15:10:18Z"
   }
 ]
