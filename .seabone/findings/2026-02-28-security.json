@@ -3,12 +3,17 @@
     "id": "security-001",
     "severity": "high",
     "category": "security",
-    "file": "scripts/spawn-agent.sh",
-    "line": 42,
-    "issue": "Hardcoded API key in test fixture",
+    "file": ".seabone/config.json",
+    "line": 40,
+    "issue": "Hardcoded database credentials in MCP server args",
     "task": "Replace hardcoded API key with environment variable reference",
     "auto_fixable": true,
-    "estimated_effort": 1
+    "estimated_effort": 1,
+    "status": "resolved",
+    "resolved_at": "2026-02-28T13:51:13Z",
+    "resolved_by": "fix-security-001",
+    "resolution": "Replaced inline DOTMAC_ERP_DB_DSN credential with ${DOTMAC_ERP_DB_DSN:?msg} env var reference. Merged via PR #5.",
+    "note": "Finding originally listed file as scripts/spawn-agent.sh line 42 — actual location was .seabone/config.json MCP server args."
   },
   {
     "id": "security-002",

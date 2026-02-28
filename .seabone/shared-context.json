@@ -1,7 +1,16 @@
 {
   "version": 1,
-  "updated_at": "2026-02-28T14:19:11Z",
+  "updated_at": "2026-02-28T15:09:09Z",
   "findings": [
+    {
+      "id": "ctx-20260228150909-26420",
+      "ts": "2026-02-28T15:09:09Z",
+      "source": "fix-security-001-v1",
+      "kind": "pattern",
+      "scope": ".seabone/findings / security-001",
+      "note": "security-001 was misidentified: finding said 'Hardcoded API key in scripts/spawn-agent.sh line 42' but the actual issue was hardcoded postgres DSN in .seabone/config.json MCP server args. Fix: use ${VAR:?msg} for required credentials in shell args. Already merged via PR #5. Findings file updated with correct metadata.",
+      "confidence": 0.97
+    },
     {
       "id": "ctx-20260228141911-2200",
       "ts": "2026-02-28T14:19:11Z",
