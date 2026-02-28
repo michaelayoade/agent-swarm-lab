@@ -22,43 +22,64 @@ jobs:
         id: diff
         run: |
           gh pr diff ${{ github.event.pull_request.number }} > /tmp/pr-diff.txt
-          echo "diff_size=$(wc -l < /tmp/pr-diff.txt)" >> "$GITHUB_OUTPUT"
+          DIFF_SIZE=$(wc -l < /tmp/pr-diff.txt)
+          echo "diff_size=$DIFF_SIZE" >> "$GITHUB_OUTPUT"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Review with MiniMax M2.5
         if: steps.diff.outputs.diff_size != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
-          DIFF=$(cat /tmp/pr-diff.txt | head -3000)
-          PR_TITLE="${{ github.event.pull_request.title }}"
+          if [[ -z "$OPENROUTER_API_KEY" ]]; then
+            echo "⚠️ OPENROUTER_API_KEY not set — skipping auto-review"
+            exit 0
+          fi
 
-          REVIEW=$(curl -s "https://openrouter.ai/api/v1/chat/completions" \
-            -H "Authorization: Bearer ${{ secrets.OPENROUTER_API_KEY }}" \
+          # Safely read diff — truncate and sanitize for JSON
+          DIFF=$(head -3000 /tmp/pr-diff.txt)
+
+          # Build request payload via jq (handles escaping properly)
+          PAYLOAD=$(jq -n \
+            --arg diff "$DIFF" \
+            --arg title "$PR_TITLE" \
+            '{
+              model: "minimax/minimax-m2.5",
+              messages: [{
+                role: "user",
+                content: ("Review this PR titled: " + $title + "\n\nCheck for:\n1) Correctness\n2) Security issues (hardcoded secrets, injection, path traversal)\n3) Performance\n4) Verdict: approve or changes-needed\n\nKeep under 400 words.\n\nDiff:\n" + $diff)
+              }],
+              temperature: 0.2,
+              max_tokens: 1500
+            }')
+
+          RESPONSE=$(curl -s --max-time 60 \
+            "https://openrouter.ai/api/v1/chat/completions" \
+            -H "Authorization: Bearer ${OPENROUTER_API_KEY}" \
             -H "Content-Type: application/json" \
             -H "X-Title: seabone-auto-review" \
-            -d "$(jq -n \
-              --arg diff "$DIFF" \
-              --arg title "$PR_TITLE" \
-              '{
-                model: "minimax/minimax-m2.5",
-                messages: [{
-                  role: "user",
-                  content: ("Review this PR titled: " + $title + "\n\nCheck for: 1) Correctness 2) Security issues (hardcoded secrets, injection, path traversal) 3) Performance 4) Verdict: approve/changes-needed. Under 400 words.\n\nDiff:\n" + $diff)
-                }],
-                temperature: 0.2,
-                max_tokens: 1500
-              }')" | jq -r '.choices[0].message.content // "Review failed"')
+            -d "$PAYLOAD")
 
-          BODY=$(cat <<EOF
+          REVIEW=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // empty')
+
+          if [[ -z "$REVIEW" ]]; then
+            ERROR=$(echo "$RESPONSE" | jq -r '.error.message // "Unknown error"')
+            echo "⚠️ Review API failed: $ERROR"
+            exit 0
+          fi
+
+          # Post comment using a temp file to avoid shell escaping issues
+          cat > /tmp/review-body.md << MDEOF
           ## 🤖 Seabone Automated Review
 
           $REVIEW
 
           ---
           *Automated review by Seabone Agent Swarm (MiniMax M2.5 via OpenRouter)*
-          EOF
-          )
+          MDEOF
 
-          gh pr comment ${{ github.event.pull_request.number }} --body "$BODY"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          gh pr comment "$PR_NUMBER" --body-file /tmp/review-body.md
