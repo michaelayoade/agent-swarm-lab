@@ -106,5 +106,8 @@
     "coverage": "claude",
     "refactor": "claude",
     "feature": "claude"
-  }
+  },
+  "plan_before_execute": true,
+  "plan_engine": "claude",
+  "plan_model": "sonnet"
 }
