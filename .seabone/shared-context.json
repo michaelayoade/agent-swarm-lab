@@ -1,5 +1,15 @@
 {
   "version": 1,
-  "updated_at": "2026-02-27T10:09:29Z",
-  "findings": []
+  "updated_at": "2026-02-28T13:51:25Z",
+  "findings": [
+    {
+      "id": "ctx-20260228135125-18587",
+      "ts": "2026-02-28T13:51:25Z",
+      "source": "fix-security-001",
+      "kind": "pattern",
+      "scope": "config.json / MCP servers",
+      "note": "Hardcoded DB credentials in .seabone/config.json MCP server args replaced with env var DOTMAC_ERP_DB_DSN. Always use ${VAR:?msg} for required env vars in shell args.",
+      "confidence": 0.9
+    }
+  ]
 }
