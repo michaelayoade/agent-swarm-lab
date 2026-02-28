@@ -1,0 +1,24 @@
+[
+  {
+    "id": "security-001",
+    "severity": "high",
+    "category": "security",
+    "file": "scripts/spawn-agent.sh",
+    "line": 42,
+    "issue": "Hardcoded API key in test fixture",
+    "task": "Replace hardcoded API key with environment variable reference",
+    "auto_fixable": true,
+    "estimated_effort": 1
+  },
+  {
+    "id": "security-002",
+    "severity": "medium",
+    "category": "security",
+    "file": "scripts/check-agents.sh",
+    "line": 100,
+    "issue": "Missing input validation on task ID parameter",
+    "task": "Add input sanitization for task ID to prevent command injection",
+    "auto_fixable": true,
+    "estimated_effort": 2
+  }
+]

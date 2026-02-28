@@ -7,6 +7,16 @@
 # Seabone logs
 .seabone/logs/*.log
 
+# Seabone runtime/state (local-only)
+.seabone/active-tasks.json
+.seabone/completed-tasks.json
+.seabone/queue.json
+.seabone/model-memory.json
+.seabone/chat-history.json*
+.seabone/sessions/
+.seabone/transcripts/
+.seabone/workspace/
+
 # Worktrees
 .worktrees/
 

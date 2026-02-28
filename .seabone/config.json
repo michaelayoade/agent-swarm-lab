@@ -1,10 +1,80 @@
 {
-  "max_concurrent_agents": 3,
+  "max_concurrent_agents": 5,
   "max_retries": 3,
   "agent_timeout_minutes": 30,
-  "model": "deepseek-chat",
-  "reason_model": "deepseek-reasoner",
   "worktree_base": "agent",
   "auto_review": true,
-  "auto_cleanup_days": 7
+  "auto_cleanup_days": 7,
+  "quality_gates": [
+    "shellcheck",
+    "pytest",
+    "eslint",
+    "go-vet"
+  ],
+  "quality_gate_retries": 1,
+  "max_review_cycles": 2,
+  "queue_enabled": true,
+  "max_queue_size": 50,
+  "heartbeat_timeout_minutes": 15,
+  "stale_state_minutes": 20,
+  "adaptive_reason_keywords": [
+    "security",
+    "auth",
+    "authentication",
+    "authorization",
+    "migration",
+    "payment",
+    "architecture",
+    "refactor"
+  ],
+  "model_learning_enabled": true,
+  "log_retention_days": 14,
+  "queue_dispatch_batch": 0,
+  "mcp_servers": {
+    "erp-db": {
+      "command": "/bin/bash",
+      "args": [
+        "-lc",
+        "DOTMAC_ERP_DB_DSN='postgresql://postgres:postgres@localhost:5437/dotmac_erp'; export DOTMAC_ERP_DB_DSN; exec npx -y @bytebase/dbhub --dsn \"$DOTMAC_ERP_DB_DSN\""
+      ],
+      "cwd": "/home/dotmac/projects/dotmac_erp",
+      "description": "DotMac ERP database - read-only queries",
+      "enabled": true,
+      "timeout": 30
+    }
+  },
+  "single_executor_mode": false,
+  "single_executor_engine": "codex",
+  "codex_only_execution": true,
+  "coordinator_engine": "codex",
+  "coordinator_model": "gpt-5.3-codex",
+  "pm_engine": "codex",
+  "pm_model": "gpt-5.3-codex",
+  "fleet_enabled": true,
+  "fleet_db_path": "/home/dotmac/projects/.seabone-fleet/fleet.db",
+  "fleet_lease_ttl_seconds": 1800,
+  "coordinator_mode": "deterministic",
+  "taskspec_scoring": {
+    "weights": {
+      "impact": 35,
+      "risk_reduction": 25,
+      "urgency": 25,
+      "effort_inverse": 15
+    }
+  },
+  "queue_policy": {
+    "enabled": true,
+    "track_capacity": {
+      "reactive": 100,
+      "feature": 50,
+      "quality": 10,
+      "coverage": 8,
+      "refactor": 7,
+      "reliability": 15,
+      "integration": 10,
+      "journey": 10,
+      "maintenance": 5
+    }
+  },
+  "shared_context_max_entries": 300
 }

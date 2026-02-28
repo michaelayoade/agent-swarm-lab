@@ -19,7 +19,7 @@ gh auth login
 ./scripts/list-tasks.sh
 
 # 5. Watch agent live
-tmux attach -t agent-fix-bug-123
+tmux attach -t agent-agent-swarm-lab-fix-bug-123
 ```
 
 ## How It Works
@@ -42,6 +42,91 @@ Each task spawns an isolated agent:
 | `notify-telegram.sh` | Send Telegram notifications |
 | `review-pr.sh` | AI code review on a PR |
 | `list-tasks.sh` | View task status |
+| `telegram-bot.py` | Bidirectional Telegram bot for remote control |
+
+## Telegram Bot (Remote Control)
+
+Control the swarm from your phone via a persistent AI agent powered by DeepSeek.
+
+### Architecture (v2)
+
+The bot is a fully persistent autonomous agent with:
+- **JSONL sessions** — conversation history survives restarts, with automatic compaction
+- **Workspace identity** — personality (SOUL.md), operator profile (USER.md), tool guidance (TOOLS.md)
+- **Long-term memory** — the agent writes to MEMORY.md and daily logs across sessions
+- **Inline keyboards** — action buttons on spawn results, help, and completions
+- **Cron scheduler** — built-in scheduled jobs (morning status, stale checks, maintenance)
+- **GitHub webhooks** — auto-respond to issues with `agent` label, new PRs, CI failures
+- **13 tools** — 8 original + write_memory, read_memory, list_prs, view_pr, merge_pr
+
+### Setup
+
+1. Ensure `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` are set in `.env.agent-swarm`
+2. Run directly: `python3 scripts/telegram-bot.py`
+3. Or install as a systemd service:
+
+```bash
+sudo cp seabone-telegram-bot.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now seabone-telegram-bot
+```
+
+### Commands
+
+| Command | Description |
+|---------|-------------|
+| `/spawn <desc>` | Spawn a new coding agent |
+| `/status` | Show swarm status (active, queued, sessions) |
+| `/logs <id> [N]` | Tail last N lines of agent log (default 50) |
+| `/kill <id>` | Kill an agent's tmux session |
+| `/queue` | Show the current task queue |
+| `/prs [state]` | List GitHub pull requests |
+| `/memory [query]` | Search long-term memory |
+| `/clear` | Clear conversation (reset session) |
+| `/help` | List available commands |
+
+Or just talk naturally — the agent decides which tools to use.
+
+### Workspace Files
+
+| File | Purpose |
+|------|---------|
+| `.seabone/workspace/SOUL.md` | Agent personality and behaviour rules |
+| `.seabone/workspace/USER.md` | Operator profile (edit to add your preferences) |
+| `.seabone/workspace/TOOLS.md` | Tool usage guidance for the agent |
+| `.seabone/workspace/MEMORY.md` | Long-term memory (written by the agent) |
+| `.seabone/workspace/memory/` | Daily logs (YYYY-MM-DD.md) |
+| `.seabone/sessions/` | JSONL conversation transcripts |
+
+### Webhooks
+
+To receive GitHub events, enable webhooks in `.seabone/config.json`:
+
+```json
+{
+  "webhook": {
+    "enabled": true,
+    "port": 18790,
+    "secret": "your-webhook-secret"
+  }
+}
+```
+
+Then configure your GitHub repo webhook to point to `http://your-server:18790/webhook/github` with content type `application/json` and the same secret.
+
+Events handled: issues with `agent` label, new PRs, CI failures.
+
+### Cron Jobs (Built-in)
+
+The bot has a built-in cron scheduler. Default jobs in config:
+
+| Job | Schedule | Action |
+|-----|----------|--------|
+| `morning-status` | `0 8 * * *` | Morning swarm status report |
+| `stale-check` | `*/30 * * * *` | Check for stale agents |
+| `maintenance` | `0 3 * * *` | Prune old sessions and logs |
+
+Security: the bot only responds to the chat ID configured in `TELEGRAM_CHAT_ID`.
 
 ## Cron Jobs
 

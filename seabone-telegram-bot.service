@@ -1,0 +1,29 @@
+[Unit]
+Description=Seabone Telegram Bot — bidirectional agent swarm control
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=dotmac
+Group=dotmac
+WorkingDirectory=/home/dotmac/projects/agent-swarm-lab
+ExecStart=/usr/bin/python3 /home/dotmac/projects/agent-swarm-lab/scripts/telegram-bot.py
+Restart=on-failure
+RestartSec=10
+Environment=PATH=/home/dotmac/.local/bin:/usr/local/bin:/usr/bin:/bin
+Environment=HOME=/home/dotmac
+
+# Sandboxing
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=false
+ReadWritePaths=/home/dotmac/projects/agent-swarm-lab/.seabone
+ReadWritePaths=/home/dotmac/projects/agent-swarm-lab/.seabone/workspace
+ReadWritePaths=/home/dotmac/projects/agent-swarm-lab/.seabone/sessions
+ReadWritePaths=/home/dotmac/projects/agent-swarm-lab/.git
+ReadWritePaths=/home/dotmac/projects/agent-swarm-lab/.worktrees
+ReadWritePaths=/tmp/seabone-locks
+
+[Install]
+WantedBy=multi-user.target
