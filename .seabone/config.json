@@ -1,10 +1,10 @@
 {
   "max_concurrent_agents": 2,
-  "max_retries": 1,
+  "max_retries": 2,
   "agent_timeout_minutes": 30,
   "worktree_base": "agent",
   "auto_review": true,
-  "auto_cleanup_days": 7,
+  "auto_cleanup_days": 3,
   "quality_gates": [
     "shellcheck",
     "pytest",
@@ -16,7 +16,7 @@
   "queue_enabled": true,
   "max_queue_size": 50,
   "heartbeat_timeout_minutes": 15,
-  "stale_state_minutes": 20,
+  "stale_state_minutes": 120,
   "adaptive_reason_keywords": [
     "security",
     "auth",
@@ -28,7 +28,7 @@
     "refactor"
   ],
   "model_learning_enabled": true,
-  "log_retention_days": 14,
+  "log_retention_days": 7,
   "queue_dispatch_batch": 1,
   "mcp_servers": {
     "erp-db": {
@@ -78,7 +78,7 @@
   },
   "shared_context_max_entries": 300,
   "codex_model": "o3",
-  "claude_model": "opus",
+  "claude_model": "sonnet",
   "review_model": "opus",
   "engine": "aider",
   "review_models": {
@@ -108,18 +108,22 @@
   },
   "plan_before_execute": true,
   "plan_engine": "openrouter",
-  "plan_model": "anthropic/claude-sonnet-4-6",
+  "plan_model": "anthropic/claude-opus-4-6",
   "focus_rotation": [
     "security",
-    "fullstack",
-    "frontend",
-    "backend",
-    "database",
-    "optimization",
     "quality",
     "api",
     "deps",
-    "coverage"
+    "coverage",
+    "migrations",
+    "observability",
+    "architecture",
+    "tasks",
+    "docs",
+    "frontend",
+    "backend",
+    "database",
+    "optimization"
   ],
   "auto_merge_enabled": true,
   "auto_merge_tracks": [
@@ -130,5 +134,7 @@
     "changelog",
     "readme"
   ],
-  "consolidate_prs": true
+  "consolidate_prs": true,
+  "_comment": "Shared config \u2014 synced to all repo .seabone/config.json by fleet-config-sync.sh",
+  "_comment2": "Keys listed in local_overrides are NOT synced (repos keep their own values)"
 }
