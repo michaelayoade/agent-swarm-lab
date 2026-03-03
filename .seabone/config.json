@@ -107,7 +107,7 @@
     "coverage": "codex-test"
   },
   "plan_before_execute": true,
-  "plan_engine": "openrouter",
+  "plan_engine": "claude",
   "plan_model": "anthropic/claude-opus-4-6",
   "focus_rotation": [
     "security",
